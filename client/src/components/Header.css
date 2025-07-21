@@ -1,0 +1,30 @@
+
+.header{
+    background-color:  lightblue;
+    display: flex;
+    padding: 10px;
+
+}
+  
+.item1 {
+flex: 80%;
+color: rgb(233, 68, 68);
+margin-right: 5px;
+background-color: blue; /* Optional: For visual differentiation */
+justify-content: center; /* Horizontal centering */
+  align-items: center; /* Vertical centering */
+  text-align: center; /* Text alignment (for multiple lines) */
+  display: flex;
+  justify-content: space-around;
+}
+
+.item2 {
+    justify-content: end;
+    flex: 20%;
+}
+
+.full-width {
+
+  flex: 100%; /* Take the full width when user is not present */
+}
+  

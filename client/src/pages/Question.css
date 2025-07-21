@@ -1,0 +1,48 @@
+
+.grid-container{
+    display: flex;
+    justify-content: space-between;
+    height: 100%;
+    width: 100%;
+}
+.div1{
+    flex: 80%;
+    margin-right: 10px;
+
+}
+.btn{
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.pbtn{
+    padding: 15px;
+    border-radius: 15px;
+    background-color: rgb(18, 202, 193);
+    color: white;
+    font-size: 1rem ;
+    font-weight: bold;
+    text-align: center;
+}
+.nbtn{
+    padding: 15px 20px;
+    border-radius: 15px;
+    background-color: rgb(18, 202, 193);
+    color: white;
+    font-size: 1rem;
+    text-align: center;
+}
+.nbtn:hover{
+    background-color: rgb(5, 109, 104);
+}
+
+.pbtn:hover{
+    background-color: rgb(5, 109, 104);
+}
+
+.div2{
+    padding: 10px;
+    display: flex;
+    flex: 20%;
+}
