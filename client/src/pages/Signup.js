@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Header from "../components/Header";
 import "./SignUP.css";
 
-const   Signup = ({ setIsSignUP, setUser }) => {
+const Signup = ({ setIsSignUP, setUser }) => {
   const [formData, setFormData] = useState({
     rollNo: "",
     name: "",
@@ -13,7 +13,7 @@ const   Signup = ({ setIsSignUP, setUser }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
@@ -31,8 +31,8 @@ const   Signup = ({ setIsSignUP, setUser }) => {
       if (response.ok) {
         const newUser = await response.json();
         console.log("Signup successful:", newUser);
-        setIsSignUP(true);
         setUser(newUser);
+        setIsSignUP(false); // Go to SignIn or next screen after signup
         setFormData({
           rollNo: "",
           name: "",
@@ -42,17 +42,13 @@ const   Signup = ({ setIsSignUP, setUser }) => {
         });
       } else {
         console.error("Signup failed");
+        alert("Signup failed. Please try again.");
       }
     } catch (error) {
       console.error("Error during signup:", error);
+      alert("An error occurred. Please check your server or connection.");
     }
   };
-
-  const style = {
-    display:"grid",
-    justifyContent:'center'
-    
-  }
 
   return (
     <div>
@@ -60,8 +56,8 @@ const   Signup = ({ setIsSignUP, setUser }) => {
       <div className="form-container">
         <h2>Signup</h2>
         <form onSubmit={handleSubmit}>
-          <div >
-            <label for="rollno">
+          <div>
+            <label htmlFor="rollno">
               Roll No:
               <input
                 type="text"
@@ -74,12 +70,12 @@ const   Signup = ({ setIsSignUP, setUser }) => {
             </label>
           </div>
           <div>
-            <label for="name">
+            <label htmlFor="name">
               Name:
               <input
                 type="text"
-                name="name"
                 id="name"
+                name="name"
                 value={formData.name}
                 onChange={handleChange}
                 required
@@ -87,7 +83,7 @@ const   Signup = ({ setIsSignUP, setUser }) => {
             </label>
           </div>
           <div>
-             <label for="class">
+            <label htmlFor="class">
               Class:
               <input
                 type="text"
@@ -100,7 +96,7 @@ const   Signup = ({ setIsSignUP, setUser }) => {
             </label>
           </div>
           <div>
-            <label for="section">
+            <label htmlFor="section">
               Section:
               <input
                 type="text"
@@ -113,7 +109,7 @@ const   Signup = ({ setIsSignUP, setUser }) => {
             </label>
           </div>
           <div>
-            <label for="dob">
+            <label htmlFor="dob">
               Date of Birth (DOB):
               <input
                 type="date"
@@ -128,7 +124,6 @@ const   Signup = ({ setIsSignUP, setUser }) => {
           <button type="submit">Signup</button>
         </form>
       </div>
-      
     </div>
   );
 };

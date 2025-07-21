@@ -6,31 +6,53 @@ import Signup from "./pages/Signup";
 import SignIn from "./pages/SignIn";
 
 function App() {
-  const [isSignUp, setIsSignUP] = useState(false);
-  const [isSignIn, setIsSignIn] = useState(false);
-  const [user, setUser] = useState([]);
-  console.log(user);
+  const [isSignedIn, setIsSignedIn] = useState(false);
+  const [showSignUp, setShowSignUp] = useState(false);
+  const [user, setUser] = useState(null); // changed to null for better clarity
+
+  const handleSignIn = (userData) => {
+    setUser(userData);
+    setIsSignedIn(true);
+  };
+
+  const handleSignUp = (userData) => {
+    setUser(userData);
+    setIsSignedIn(true);
+  };
+
   return (
     <div>
-      {/* <SignIn setUser={setUser} /> */}
-      {!isSignIn ? (
-        <SignIn setIsSignIn={setIsSignIn} setUser={setUser} />
-      ) : (
-        <Questions user={user} />
-      )}
-        {/* <Questions user={user} /> */}
+      {/* <Header /> Uncomment if you have a Header */}
 
-      {!isSignUp ? (
-        <Signup isSignUp={setIsSignUP} setUser={setUser} />
-      ) : (
+      {/* If user is signed in, show Questions page */}
+      {isSignedIn ? (
         <Questions user={user} />
+      ) : (
+        <>
+          {/* Toggle between SignIn and SignUp */}
+          {showSignUp ? (
+            <Signup setIsSignUP={setShowSignUp} setUser={handleSignUp} />
+          ) : (
+            <SignIn setIsSignIn={setIsSignedIn} setUser={handleSignIn} />
+          )}
+
+          {/* Optional link to switch between SignIn/SignUp */}
+          <div style={{ textAlign: "center", marginTop: "20px" }}>
+            <p>
+              {showSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
+              <button onClick={() => setShowSignUp(!showSignUp)}>
+                {showSignUp ? "Sign In" : "Sign Up"}
+              </button>
+            </p>
+          </div>
+        </>
       )}
-      
-      
-      
-      {/* <AdminLogin /> */}
+
+      {/* <AdminLogin /> Uncomment when needed */}
     </div>
   );
 }
 
 export default App;
+
+
