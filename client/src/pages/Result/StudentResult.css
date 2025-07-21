@@ -1,0 +1,40 @@
+.result-container {
+  padding: 20px;
+  max-width: 900px;
+  margin: auto;
+}
+
+.question-box {
+  border: 1px solid #ddd;
+  padding: 12px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  background: #f9f9f9;
+}
+
+.question-box.correct {
+  border-left: 5px solid green;
+}
+
+.question-box.wrong {
+  border-left: 5px solid red;
+}
+
+ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+li {
+  margin: 6px 0;
+}
+
+.correct-option {
+  font-weight: bold;
+  color: green;
+}
+
+.selected-option {
+  font-weight: bold;
+  color: red;
+}

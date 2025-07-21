@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import Header from "../components/Header";
+import Header from "../components/Header.js";
 import "./Question.css";
 import Sidebar from "./Sidebar";
+import StudentResult from "./Result/StudentResult";
 
 function Questions({ user }) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -10,7 +11,8 @@ function Questions({ user }) {
   const [selectedOption, setSelectedOption] = useState(null);
   const [answered, setAnswered] = useState([]);
   const [userAnswers, setUserAnswers] = useState([]);
-  const [isLoading, setIsLoading] = useState(false); // Loading state for submission
+  const [isLoading, setIsLoading] = useState(false);
+  const [showResult, setShowResult] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -19,67 +21,77 @@ function Questions({ user }) {
   useEffect(() => {
     if (questions.length > 0) {
       setCurrentQuestion(questions[currentIndex]);
-      setSelectedOption(null); // Reset selected option when switching questions
+      const answeredQuestion = userAnswers[currentIndex];
+      setSelectedOption(answeredQuestion?.selectedOption ?? null);
     }
-  }, [currentIndex, questions]);
+  }, [currentIndex, questions, userAnswers]);
 
-  // Handler to go to the next question
-  const next = () => {
-    if (selectedOption !== null) {
-      const updatedAnswered = [...answered];
-      updatedAnswered[currentIndex] = true; // Mark current question as answered
-      setAnswered(updatedAnswered);
-
-      // Update the user answers
-      const updatedUserAnswers = [...userAnswers];
-      updatedUserAnswers[currentIndex] = {
-        questionId: currentQuestion?.id,
-        selectedOption: selectedOption,
-      };
-      setUserAnswers(updatedUserAnswers);
-    }
-
-    if (currentIndex < questions.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-    } else {
-      setCurrentIndex(0); // Loop back to first question if at the last question
-    }
-  };
-
-  // Handler to go to the previous question
-  const previous = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
-    } else {
-      setCurrentIndex(questions.length - 1); // Loop back to last question if at the first question
-    }
-  };
-
-  // Fetch data function
-  async function fetchData() {
+  const fetchData = async () => {
     try {
       const res = await fetch("http://localhost:8000/questions");
       const data = await res.json();
-      setQuestions(data); // Access the questions array
-      setAnswered(new Array(data.length).fill(false)); // Initialize answered array
+      setQuestions(data);
+      setAnswered(new Array(data.length).fill(false));
     } catch (err) {
-      console.log(err); // Handle errors
+      console.error("Error fetching questions:", err);
     }
-  }
-
-  // Handler to update selected option
-  const handleOptionChange = (index) => {
-    setSelectedOption(index); // Update selected option
   };
 
-  // Handler for submitting answers
+  const handleOptionChange = (index) => {
+    setSelectedOption(index);
+  };
+
+  const next = () => {
+    if (selectedOption !== null) {
+      updateUserAnswer(currentIndex, selectedOption);
+    }
+
+    setCurrentIndex((prev) =>
+      prev < questions.length - 1 ? prev + 1 : 0
+    );
+  };
+
+  const previous = () => {
+    setCurrentIndex((prev) =>
+      prev > 0 ? prev - 1 : questions.length - 1
+    );
+  };
+
+  const updateUserAnswer = (index, selectedOption) => {
+    const updatedAnswered = [...answered];
+    updatedAnswered[index] = true;
+    setAnswered(updatedAnswered);
+
+    const updatedUserAnswers = [...userAnswers];
+    updatedUserAnswers[index] = {
+      questionId: questions[index]?.id,
+      selectedOption,
+    };
+    setUserAnswers(updatedUserAnswers);
+  };
+
   const handleSubmit = async () => {
-    console.log(user,user.id);
-    setIsLoading(true); // Set loading state to true
+    if (selectedOption !== null) {
+      updateUserAnswer(currentIndex, selectedOption);
+    }
+
+    // Optional: Ensure all questions are answered
+    if (userAnswers.length < questions.length) {
+      alert("Please answer all questions before submitting.");
+      return;
+    }
+
+    setIsLoading(true);
+
+    const formattedDate = new Date()
+      .toISOString()
+      .slice(0, 19)
+      .replace("T", " ");
+
     const submissionData = {
-      userId: user.id, // Assuming user object has an 'id' property
-      date: new Date().toISOString(), // Current date in ISO format
-      answers: userAnswers, // User answers
+      userId: user.id,
+      date: formattedDate,
+      answers: userAnswers,
     };
 
     try {
@@ -88,26 +100,28 @@ function Questions({ user }) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(submissionData), // Send user answers to the backend
+        body: JSON.stringify(submissionData),
       });
 
       if (response.ok) {
-        console.log("Answers submitted successfully");
-        // Reset selection and user answers if needed
-        setUserAnswers([]); 
-        setAnswered(new Array(questions.length).fill(false));
-        setCurrentIndex(0); // Reset to first question
+        console.log("✅ Answers submitted successfully");
+        setShowResult(true);
       } else {
-        console.log("Failed to submit answers");
+        const errorText = await response.text();
+        console.error("❌ Failed to submit answers:", errorText);
+        alert("Error submitting answers. Check backend logs.");
       }
     } catch (error) {
-      console.log("Error submitting answers:", error);
+      console.error("❌ Network error:", error);
     } finally {
-      setIsLoading(false); // Reset loading state
+      setIsLoading(false);
     }
   };
 
-  // Render loading message if questions data is not yet loaded
+  if (showResult) {
+    return <StudentResult user={user} />;
+  }
+
   if (!currentQuestion) {
     return <div>Loading questions...</div>;
   }
@@ -117,21 +131,19 @@ function Questions({ user }) {
       <Header user={user} />
       <div className="grid-container">
         <div className="div1">
-          <h3></h3>
           <h3>
-            Question no.{currentQuestion?.id}: {currentQuestion?.question}
+            Question no. {currentIndex + 1}: {currentQuestion.question}
           </h3>
 
-          {/* Display options */}
-          {currentQuestion?.options?.map((option, index) => (
+          {currentQuestion.options.map((option, index) => (
             <div key={index}>
               <label>
                 <input
                   type="radio"
                   name="option"
                   value={index}
-                  checked={selectedOption === index} // Check if the option is selected
-                  onChange={() => handleOptionChange(index)} // Handle option change
+                  checked={selectedOption === index}
+                  onChange={() => handleOptionChange(index)}
                 />
                 {option}
               </label>
@@ -139,31 +151,24 @@ function Questions({ user }) {
           ))}
 
           <div className="btn">
-            <button 
-            className="pbtn" 
-            onClick={previous} 
-            disabled={isLoading}>
+            <button className="pbtn" onClick={previous} disabled={isLoading}>
               <b>Previous</b>
             </button>
-            <button 
-            className="nbtn" 
-            onClick={next} 
-            disabled={isLoading}>
+            <button className="nbtn" onClick={next} disabled={isLoading}>
               <b>Next</b>
             </button>
           </div>
         </div>
+
         <div className="div2">
-          <div>
-            <Sidebar
-              count={questions.length}
-              setCurrentIndex={setCurrentIndex}
-              answered={answered} // Pass answered state to Sidebar
-            />
-            <button className="nbtn" onClick={handleSubmit} disabled={isLoading}>
-              <b>{isLoading ? "Submitting..." : "Submit"}</b>
-            </button>
-          </div>
+          <Sidebar
+            count={questions.length}
+            setCurrentIndex={setCurrentIndex}
+            answered={answered}
+          />
+          <button className="nbtn" onClick={handleSubmit} disabled={isLoading}>
+            <b>{isLoading ? "Submitting..." : "Submit"}</b>
+          </button>
         </div>
       </div>
     </div>
